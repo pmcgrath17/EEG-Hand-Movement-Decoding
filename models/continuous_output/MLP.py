@@ -60,8 +60,8 @@ if __name__ == '__main__':
         #tf.keras.layers.ReLU(max_value=1),
     ])
     model.compile(optimizer='adam',
-                  loss=tf.keras.losses.MeanSquaredError(),
-                  metrics=['accuracy']
+                  loss='mse',
+                  metrics=[tf.metrics.MeanSquaredError()]
     )
 
     history = model.fit(features, labels[:, 1], epochs=8, verbose=1, validation_split=0.4)
@@ -74,14 +74,14 @@ if __name__ == '__main__':
 
     # Plot results
 
-    train_acc = history.history['accuracy']
-    val_acc = history.history['val_accuracy']
+    train_acc = history.history['mean_squared_error']
+    val_acc = history.history['val_mean_squared_error']
 
     fig, axes = plotter.subplots()
     axes.set_title('MLP Learning Plot With Linear Output')
-    axes.plot(train_acc, label='training accuracy')
-    axes.plot(val_acc, label='validation accuracy')
+    axes.plot(train_acc, label='training mse')
+    axes.plot(val_acc, label='validation mse')
     axes.set_xlabel('Epochs')
-    axes.set_ylabel('Accuracy')
+    axes.set_ylabel('Mean Squared Error')
     axes.legend(loc='center right')
     plotter.show()
