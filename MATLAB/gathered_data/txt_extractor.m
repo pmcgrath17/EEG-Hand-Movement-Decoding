@@ -1,5 +1,5 @@
 %% Load data and Constants
-filename = 'C:\Users\mcgrathp\Documents\Undergrad_Research\EMG-Decoder-master\EMG-Decoder-master\python\saved_data\test_2020-09-11_13-24-16.json';
+filename = 'C:\Users\mcgrathp\Documents\Undergrad_Research\EMG-Decoder-master\EMG-Decoder-master\python\saved_data\train_2020-09-15_21-21-27.json';
 json = jsondecode(fileread(filename));
 
 output_folder = 'C:\Users\mcgrathp\PycharmProjects\EEG-Hand-Movement-Decoding\raw_data\';
@@ -51,7 +51,9 @@ end
 
 % Save finger labels to .txt file
 function save_labels(finger_data, output_folder)
+    shifted_finger_data = finger_data + 1;
+    shifted_finger_data = shifted_finger_data / 2;
     output_file = sprintf('Data_Finger_Labels');
     output_file_name = strcat(output_folder, output_file);
-    writematrix(finger_data, output_file_name, 'Delimiter', 'tab');
+    writematrix(shifted_finger_data, output_file_name, 'Delimiter', 'tab');
 end

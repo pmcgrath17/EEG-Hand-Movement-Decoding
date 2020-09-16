@@ -48,26 +48,24 @@ if __name__ == '__main__':
 
     # Shuffle the data
     features, labels = sklearn.utils.shuffle(projected_features, labels)
-    print(features.shape)
-    print(freq_bins.shape)
 
     # Train models (one for each finger)
     models = []
     histories = []
-    for i in range(5):
-        model = tf.keras.Sequential([
-            tf.keras.layers.Flatten(input_shape=(num_channels, freq_bins.shape[0])),
-            tf.keras.layers.Dense(100, activation='relu'),
-            tf.keras.layers.Dense(100, activation='relu'),
-            tf.keras.layers.Dense(1, activation='linear')
-        ])
-        model.compile(optimizer='adam',
-                      loss=tf.keras.losses.MeanSquaredError(),
-                      metrics=['accuracy']
-        )
+    #for i in range(5):
+    model = tf.keras.Sequential([
+        tf.keras.layers.Flatten(input_shape=(num_channels, freq_bins.shape[0])),
+        tf.keras.layers.Dense(100, activation='relu'),
+        tf.keras.layers.Dense(1, activation='linear'),
+        #tf.keras.layers.ReLU(max_value=1),
+    ])
+    model.compile(optimizer='adam',
+                  loss=tf.keras.losses.MeanSquaredError(),
+                  metrics=['accuracy']
+    )
 
-        history = model.fit(features, labels[:, i], epochs=100, verbose=1, validation_split=0.4)
-        histories += [history]
+    history = model.fit(features, labels[:, 1], epochs=8, verbose=1, validation_split=0.4)
+    histories += [history]
 
     # Evaluate model
     #######
@@ -75,3 +73,15 @@ if __name__ == '__main__':
     #######
 
     # Plot results
+
+    train_acc = history.history['accuracy']
+    val_acc = history.history['val_accuracy']
+
+    fig, axes = plotter.subplots()
+    axes.set_title('MLP Learning Plot With Linear Output')
+    axes.plot(train_acc, label='training accuracy')
+    axes.plot(val_acc, label='validation accuracy')
+    axes.set_xlabel('Epochs')
+    axes.set_ylabel('Accuracy')
+    axes.legend(loc='center right')
+    plotter.show()
