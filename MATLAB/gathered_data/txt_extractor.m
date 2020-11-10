@@ -1,14 +1,18 @@
+%% MODIFY THIS TO DETERMINE HOW MANY EEG READINGS YOU WANT TO HAVE PER TXT
+% FILE!!!
+sample_size = 1000;
 %% Load data and Constants
-filename = 'C:\Users\mcgrathp\Documents\Undergrad_Research\EMG-Decoder-master\EMG-Decoder-master\python\saved_data\train_2020-09-15_21-21-27.json';
+% These filepaths may need to be modified depending on where you have
+% placed the github repository.
+filename = 'C:\Users\mcgrathp\PycharmProjects\EEG-Hand-Movement-Decoding\raw_data\classification_data\training_02_11_2020.json';
 json = jsondecode(fileread(filename));
 
-output_folder = 'C:\Users\mcgrathp\PycharmProjects\EEG-Hand-Movement-Decoding\raw_data\';
+output_folder = 'C:\Users\mcgrathp\PycharmProjects\EEG-Hand-Movement-Decoding\raw_data\text_data\';
 
 %% Loop through and calculate features at each timestep
 n_features = 16;
 N = length(json.raw_list);
 z = zeros(N, n_features);
-sample_size = 1000;
 
 % flip buffer so that the oldest sample is at the top
 buffer = flip(json.raw_list{1}, 1);
@@ -30,12 +34,12 @@ for i=2:N
     %z(i, :) = calc_feature(buffer);
     
     small_buffer = buffer_for_export(buffer, size(buffer, 1));
-    small_buffer = average_dataset(small_buffer, sample_size);
     save_data(small_buffer, output_folder, i);
 end
 
 save_labels(json.finger_data, output_folder);
 
+% Average out the dataset for smoothing
 function averaged_buffer = average_dataset(buffer, sample_size)
     averaged_buffer = buffer;
     for i=sample_size + 1:length(buffer)
@@ -61,7 +65,7 @@ end
 function save_data(buffer, output_folder, index)
     output_file = sprintf('Data_EEG_%d', index - 1);
     output_file_name = strcat(output_folder, output_file);
-    writematrix(common_average_reference(buffer), output_file_name, 'Delimiter', 'tab');
+    writematrix(buffer, output_file_name, 'Delimiter', 'tab');
 end
 
 % Save finger labels to .txt file
