@@ -37,7 +37,11 @@ for i=2:N
     save_data(small_buffer, output_folder, i);
 end
 
+% Save the continuous finger labels
 save_labels(json.finger_data, output_folder);
+
+% Save the classified hand movement
+save_classification_labels(json.finger_data, output_folder);
 
 % Average out the dataset for smoothing
 function averaged_buffer = average_dataset(buffer, sample_size)
@@ -76,4 +80,24 @@ function save_labels(finger_data, output_folder)
     output_file = sprintf('Data_Finger_Labels');
     output_file_name = strcat(output_folder, output_file);
     writematrix(shifted_finger_data, output_file_name, 'Delimiter', 'tab');
+end
+
+% Save classifiaction finger labels to .txt file
+function save_classification_labels(finger_data, output_folder)
+    %shifted_finger_data = finger_data + 1;
+    %shifted_finger_data = shifted_finger_data / 2;
+    classification_finger_data = zeros(size(finger_data, 1), 1);
+    
+    for i=1:size(finger_data,1)
+        non_thumb_measurements = finger_data(i, 2:5);
+       if mean(non_thumb_measurements) > 0
+           classification_finger_data(i) = 1;
+       else 
+           classification_finger_data(i) = -1;
+       end
+    end
+
+    output_file = sprintf('Classification_Hand_Labels');
+    output_file_name = strcat(output_folder, output_file);
+    writematrix(classification_finger_data, output_file_name, 'Delimiter', 'tab');
 end
