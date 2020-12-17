@@ -16,29 +16,30 @@ z = zeros(N, n_features);
 
 % flip buffer so that the oldest sample is at the top
 buffer = flip(json.raw_list{1}, 1);
-%z(1, :) = calc_feature(buffer);
-len = size(json.raw_list{1}, 1);
-small_buffer = buffer_for_export(buffer, size(buffer, 1));
-save_data(small_buffer, output_folder, 1);
-for i=2:N
-    % length of new raw data packet
-    len = size(json.raw_list{i}, 1);
-    
-    % make room for the new samples
-    buffer = circshift(buffer, -len);
-    
-    % insert the new samples
-    buffer(end-len+1:end, :) = json.raw_list{i};
-    
-    % calculate features (For now, implementation is in Python...)
-    %z(i, :) = calc_feature(buffer);
-    
-    small_buffer = buffer_for_export(buffer, size(buffer, 1));
-    save_data(small_buffer, output_folder, i);
-end
-
-% Save the continuous finger labels
-save_labels(json.finger_data, output_folder);
+save_data(buffer, output_folder, 0);
+% %z(1, :) = calc_feature(buffer);
+% len = size(json.raw_list{1}, 1);
+% small_buffer = buffer_for_export(buffer, size(buffer, 1));
+% save_data(small_buffer, output_folder, 1);
+% for i=2:N
+%     % length of new raw data packet
+%     len = size(json.raw_list{i}, 1);
+%     
+%     % make room for the new samples
+%     buffer = circshift(buffer, -len);
+%     
+%     % insert the new samples
+%     buffer(end-len+1:end, :) = json.raw_list{i};
+%     
+%     % calculate features (For now, implementation is in Python...)
+%     %z(i, :) = calc_feature(buffer);
+%     
+%     small_buffer = buffer_for_export(buffer, size(buffer, 1));
+%     save_data(small_buffer, output_folder, i);
+% end
+% 
+% % Save the continuous finger labels
+% save_labels(json.finger_data, output_folder);
 
 % Save the classified hand movement
 save_classification_labels(json.finger_data, output_folder);
@@ -83,17 +84,40 @@ function save_labels(finger_data, output_folder)
 end
 
 % Save classifiaction finger labels to .txt file
+% The labels are supplied as follows:
+%   0: Open hand label
+%   1: Closing hand label
+%   2: Closed hand label
+%   3: Openning hand label
+% Note that the threshold for open and closed hand readings are different.
+% This is because it is easy to get closed hand reading while the open hand
+% readings are a bit more volatile and must have a lower threshold (based
+% on magnitude) as a result.
+
 function save_classification_labels(finger_data, output_folder)
     %shifted_finger_data = finger_data + 1;
     %shifted_finger_data = shifted_finger_data / 2;
     classification_finger_data = zeros(size(finger_data, 1), 1);
     
-    for i=1:size(finger_data,1)
+    if filename == 'C:\Users\mcgrathp\PycharmProjects\EEG-Hand-Movement-Decoding\raw_data\classification_data\training_02_11_2020.json'
+        classification_finger_data(1) = 3;
+    end
+    
+    for i=2:size(finger_data,1)
         non_thumb_measurements = finger_data(i, 2:5);
-       if mean(non_thumb_measurements) > 0
+        average_hand_measurement = mean(non_thumb_measurements);
+        % Closed hand has a label of 2
+       if average_hand_measurement > .98
+           classification_finger_data(i) = 2;
+        % Open hand has a label of 0
+       elseif average_hand_measurement < -.96
+           classification_finger_data(i) = 0;
+        % Closing hand has a label of 1
+       elseif classification_finger_data(i-1) == 1 || classification_finger_data(i-1) == 0
            classification_finger_data(i) = 1;
-       else 
-           classification_finger_data(i) = -1;
+        % Openning hand has a label of 3
+       else
+           classification_finger_data(i) = 3;
        end
     end
 
