@@ -18,26 +18,26 @@ z = zeros(N, n_features);
 buffer = flip(json.raw_list{1}, 1);
 save_data(buffer, output_folder, 0);
 % %z(1, :) = calc_feature(buffer);
-% len = size(json.raw_list{1}, 1);
-% small_buffer = buffer_for_export(buffer, size(buffer, 1));
-% save_data(small_buffer, output_folder, 1);
-% for i=2:N
-%     % length of new raw data packet
-%     len = size(json.raw_list{i}, 1);
-%     
-%     % make room for the new samples
-%     buffer = circshift(buffer, -len);
-%     
-%     % insert the new samples
-%     buffer(end-len+1:end, :) = json.raw_list{i};
-%     
-%     % calculate features (For now, implementation is in Python...)
-%     %z(i, :) = calc_feature(buffer);
-%     
-%     small_buffer = buffer_for_export(buffer, size(buffer, 1));
-%     save_data(small_buffer, output_folder, i);
-% end
-% 
+len = size(json.raw_list{1}, 1);
+small_buffer = buffer_for_export(buffer, size(buffer, 1));
+save_data(small_buffer, output_folder, 1);
+for i=2:N
+    % length of new raw data packet
+    len = size(json.raw_list{i}, 1);
+    
+    % make room for the new samples
+    buffer = circshift(buffer, -len);
+    
+    % insert the new samples
+    buffer(end-len+1:end, :) = json.raw_list{i};
+    
+    % calculate features (For now, implementation is in Python...)
+    %z(i, :) = calc_feature(buffer);
+    
+    small_buffer = buffer_for_export(buffer, size(buffer, 1));
+    save_data(small_buffer, output_folder, i);
+end
+
 % % Save the continuous finger labels
 % save_labels(json.finger_data, output_folder);
 
